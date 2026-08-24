@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <ctime>
 #include <map>
 using namespace std;
 // define board dice player snake ladder
@@ -8,7 +9,7 @@ class board
 {
     int roll;
     int previous;
-    int current;
+    int current = 0;
     int intermediate;
     int final;
     map<int, int> port;
@@ -28,9 +29,9 @@ public:
         // ladder
         port[8] = 64;
         port[78] = 95;
-        port[42] = 77;
+        port[52] = 77;
         port[22] = 45;
-        port[65] = 92;
+        port[65] = 93;
         port[4] = 42;
     }
     void getMove(dice &d1);
@@ -54,7 +55,8 @@ void board::getMove(dice &d1)
     roll = d1.randomRoll();
 }
 void board::setMove()
-{   previous = current;
+{
+    previous = current;
     intermediate = current + roll;
     if (intermediate > 100)
     {
@@ -65,41 +67,45 @@ void board::setMove()
     {
         final = port[intermediate];
     }
-    else final = intermediate;
+    else
+        final = intermediate;
 
     current = final;
 }
 void board::current_state()
 {
-    cout << "Current Position: " << current;
-    cout << "Rolled: " << roll;
+    cout << "Start Square: " << previous << " | Rolled: " << roll;
 
     if (intermediate > 100)
     {
-        cout << " | Overshot 100! Stayed at square " << current << endl;
+        cout << " | Overshot 100! Stayed at square " << previous << endl;
     }
     else if (final != intermediate)
-    {   
-        if (final > intermediate) {
+    {
+        if (final > intermediate)
+        {
             cout << " | Landed on " << intermediate << " -> LADDER to square " << final << endl;
-        } else {
+        }
+        else
+        {
             cout << " | Landed on " << intermediate << " -> SNAKE down to square " << final << endl;
         }
-    } else {
+    }
+    else
+    {
         cout << " | Moved to square " << final << endl;
     }
 }
 
 int board::check()
 {
-    return current==100;
+    return current == 100;
 }
 
 /********************************************************************************** */
 int dice::randomRoll()
 {
-    random_device rd;
-    mt19937 rolls(rd());
+    static mt19937 rolls(time(0));
     uniform_int_distribution<int> range(1, 6);
     roll = range(rolls);
     return roll;
