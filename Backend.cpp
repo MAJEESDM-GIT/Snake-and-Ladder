@@ -2,31 +2,27 @@
 #include <random>
 #include <ctime>
 #include <map>
+
 using namespace std;
-// define board dice player snake ladder
+
 class dice;
 class board
 {
-    int roll;
-    int previous;
-    int current = 0;
-    int intermediate;
-    int final;
-    map<int, int> port;
+    int grid[100];
 
 public:
+    map<int, int> port;
     board()
     {
-        current = 0;
-
-        // snake
+        // Snakes
         port[99] = 8;
         port[92] = 73;
         port[84] = 77;
         port[25] = 5;
         port[49] = 11;
         port[62] = 42;
-        // ladder
+
+        // Ladders
         port[8] = 64;
         port[78] = 95;
         port[52] = 77;
@@ -34,91 +30,147 @@ public:
         port[65] = 93;
         port[4] = 42;
     }
-    void getMove(dice &d1);
-    void setMove();
-    void current_state();
-    int check();
 };
+class Player
+{
+    int roll = 0;
+    int previous = 0;
+    int current = 0;
+    int intermediate = 0;
+    int final = 0;
+    char temp ;
+public:
+    void getMove(dice &d1);
+    void setMove(board &b1);
+    void currentState();
+    bool isFinished();
+    void greet();
+};
+
 class dice
 {
-    int roll;
-    int turn;
+    mt19937 gen;
+    uniform_int_distribution<int> range;
 
 public:
-    int randomRoll();
+    dice() : gen(random_device{}()), range(1, 6) {}
+
+    int randomRoll()
+    {
+        return range(gen);
+    }
 };
 
-/**********************************************************************************/
 
-void board::getMove(dice &d1)
-{
-    roll = d1.randomRoll();
+/************************************************************************ */
+void Player :: greet(){
+    system("cls");
+    cout<<"\n\tSNAKE AND LADDERS\n";
 }
-void board::setMove()
+
+void Player::getMove(dice &d1)
+{
+    cout<<"\nPress any key roll the dice"<<endl;
+    cin>>temp;
+    if(temp != 'r' || temp !=  'R'){
+    roll = d1.randomRoll();
+    }
+    else exit(0);
+}
+
+void Player::setMove(board &b1)
 {
     previous = current;
     intermediate = current + roll;
+
     if (intermediate > 100)
     {
         final = current;
         return;
     }
-    if (port.find(intermediate) != port.end())
+
+    if (b1.port.find(intermediate) != b1.port.end())
     {
-        final = port[intermediate];
+        final = b1.port[intermediate];
     }
     else
+    {
         final = intermediate;
+    }
 
     current = final;
 }
-void board::current_state()
+
+void Player::currentState()
 {
-    cout << "Start Square: " << previous << " | Rolled: " << roll;
+    cout << "Rolled: " << roll << " \n| From: " << previous;
 
     if (intermediate > 100)
     {
-        cout << " | Overshot 100! Stayed at square " << previous << endl;
+        cout << " \n| Overshot 100! Stayed at square " << current << "\n";
     }
     else if (final != intermediate)
     {
         if (final > intermediate)
         {
-            cout << " | Landed on " << intermediate << " -> LADDER to square " << final << endl;
+            cout << " -> Landed on " << intermediate << " \n-> LADDER to square " << final << "\n";
         }
         else
         {
-            cout << " | Landed on " << intermediate << " -> SNAKE down to square " << final << endl;
+            cout << " -> Landed on " << intermediate << " \n-> SNAKE down to square " << final << "\n";
         }
     }
     else
     {
-        cout << " | Moved to square " << final << endl;
+        cout << " -> Moved to square " << final << "\n";
     }
 }
 
-int board::check()
+bool Player::isFinished()
 {
     return current == 100;
 }
-
-/********************************************************************************** */
-int dice::randomRoll()
-{
-    static mt19937 rolls(time(0));
-    uniform_int_distribution<int> range(1, 6);
-    roll = range(rolls);
-    return roll;
+void opening(){
+ system("cls");
+    cout<<"\n\tSNAKE AND LADDERS\n";
 }
 int main()
-{
-    board b1;
-    dice d1;
-    while (!(b1.check()))
+{   
+    opening();
+    int count;
+    cout << "Enter Player Number: " << endl;
+    cin >> count;
+    if (count <= 0)
     {
-        b1.getMove(d1);
-        b1.setMove();
-        b1.current_state();
+        cerr << "Invalid player count.\n";
+        return 1;
     }
+
+    Player player[count];
+    dice d1;
+    board b1;
+    int turn = 0;
+    int turnCount = 0;
+    player[turn].greet();
+    while (true)
+    {
+        turnCount++;
+        cout << "\nTurn of player : " << turn + 1 << ": ";
+        player[turn].getMove(d1);
+        player[turn].setMove(b1);
+        player[turn].currentState();
+        if (player[turn].isFinished())
+        {
+            break;
+        }
+        turn++;
+        if (turn == (count))
+        {
+            turn = 0;
+        }
+    }
+
+    cout << "\nGame won in " << turnCount << " turns!\n";
+    cout << "\nGame won by player: " << turn + 1 << "\n";
     return 0;
 }
