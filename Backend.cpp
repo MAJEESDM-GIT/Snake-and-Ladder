@@ -8,9 +8,9 @@ using namespace std;
 class dice;
 class board
 {
+public:
     int grid[100];
 
-public:
     map<int, int> port;
     board()
     {
@@ -33,13 +33,16 @@ public:
 };
 class Player
 {
+
     int roll = 0;
     int previous = 0;
     int current = 0;
     int intermediate = 0;
     int final = 0;
-    char temp ;
+    char temp;
+
 public:
+    string name;
     void getMove(dice &d1);
     void setMove(board &b1);
     void currentState();
@@ -61,21 +64,24 @@ public:
     }
 };
 
-
 /************************************************************************ */
-void Player :: greet(){
+void Player ::greet()
+{
     system("cls");
-    cout<<"\n\tSNAKE AND LADDERS\n";
+    cout << "\n\tSNAKE AND LADDERS\n";
+    cout<<"\t\t\t\tPress Q to quit"<<endl;
 }
 
 void Player::getMove(dice &d1)
 {
-    cout<<"\nPress any key roll the dice"<<endl;
-    cin>>temp;
-    if(temp != 'r' || temp !=  'R'){
-    roll = d1.randomRoll();
+    cout << "\nPress any key roll the dice" << endl;
+    cin >> temp;
+    if (temp == 'q' || temp == 'Q')
+    {
+        exit(0);
     }
-    else exit(0);
+    else
+        roll = d1.randomRoll();
 }
 
 void Player::setMove(board &b1)
@@ -130,13 +136,19 @@ bool Player::isFinished()
 {
     return current == 100;
 }
-void opening(){
- system("cls");
-    cout<<"\n\tSNAKE AND LADDERS\n";
-}
+void setupPlayers(vector<Player> &player)
+{
+    for (size_t i = 0; i < player.size(); ++i)
+    {
+        cout << "Enter Name for Player " << (i + 1) << ": ";
+        cin >> player[i].name;
+    }
+};
 int main()
-{   
-    opening();
+{
+    system("cls");
+    cout<<"\n\tSNAKE AND LADDERS\n";
+    
     int count;
     cout << "Enter Player Number: " << endl;
     cin >> count;
@@ -145,17 +157,19 @@ int main()
         cerr << "Invalid player count.\n";
         return 1;
     }
-
-    Player player[count];
+    int turn = 0;
+    
+    int turnCount = 0;
+    vector<Player> player(count);
     dice d1;
     board b1;
-    int turn = 0;
-    int turnCount = 0;
+    setupPlayers(player);
     player[turn].greet();
     while (true)
     {
         turnCount++;
-        cout << "\nTurn of player : " << turn + 1 << ": ";
+       cout << "\n----------------------------------------";
+        cout << "\nTurn of " << player[turn].name << " (Player " << turn + 1 << "):";
         player[turn].getMove(d1);
         player[turn].setMove(b1);
         player[turn].currentState();
@@ -171,6 +185,10 @@ int main()
     }
 
     cout << "\nGame won in " << turnCount << " turns!\n";
-    cout << "\nGame won by player: " << turn + 1 << "\n";
+    cout << "\nGame won by player: " << player[turn].name << "\n";
     return 0;
 }
+
+
+
+ 
