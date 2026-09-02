@@ -2,9 +2,11 @@
 #include <random>
 #include <ctime>
 #include <map>
-
+#include<vector>
 using namespace std;
 
+
+void clear_buffer();
 class dice;
 class board
 {
@@ -52,12 +54,11 @@ public:
 
 class dice
 {
-    mt19937 gen;
-    uniform_int_distribution<int> range;
+    // mt19937 gen{random_device{}()};
+    mt19937 gen{static_cast<unsigned>(std::time(nullptr))};
+    uniform_int_distribution<int> range{1, 6};
 
 public:
-    dice() : gen(random_device{}()), range(1, 6) {}
-
     int randomRoll()
     {
         return range(gen);
@@ -69,12 +70,13 @@ void Player ::greet()
 {
     system("cls");
     cout << "\n\tSNAKE AND LADDERS\n";
-    cout<<"\t\t\t\tPress Q to quit"<<endl;
+    cout << "\t\t\t\tPress Q to quit" << endl;
 }
 
 void Player::getMove(dice &d1)
 {
     cout << "\nPress any key roll the dice" << endl;
+    clear_buffer();
     cin >> temp;
     if (temp == 'q' || temp == 'Q')
     {
@@ -136,59 +138,132 @@ bool Player::isFinished()
 {
     return current == 100;
 }
-void setupPlayers(vector<Player> &player)
+
+class room
 {
-    for (size_t i = 0; i < player.size(); ++i)
+public:
+    int id;
+    int capacity = 3;
+    vector<Player> player;
+    bool started = false;
+    int start_game()
     {
-        cout << "Enter Name for Player " << (i + 1) << ": ";
-        cin >> player[i].name;
+        system("cls");
+        cout << "\n\tSNAKE AND LADDERS\n";
+        int turn = 0;
+        int turnCount = 0;
+        dice d1;
+        board b1;
+        player[turn].greet();
+        while (true)
+        {
+            turnCount++;
+            cout << "\n----------------------------------------";
+            cout << "\nTurn of " << player[turn].name << " (Player " << turn + 1 << "):";
+            player[turn].getMove(d1);
+            player[turn].setMove(b1);
+            player[turn].currentState();
+            if (player[turn].isFinished())
+            {
+                break;
+            }
+            turn++;
+            if (turn == (capacity))
+            {
+                turn = 0;
+            }
+        }
+
+        cout << "\nGame won in " << turnCount << " turns!\n";
+        cout << "\nGame won by player: " << player[turn].name << "\n";
+        return 0;
     }
 };
+void clear_buffer() {
+    cin.clear();
+    int ch;
+    while ((ch = cin.get()) != '\n' && ch != EOF);
+}
 int main()
 {
-    system("cls");
-    cout<<"\n\tSNAKE AND LADDERS\n";
-    
-    int count;
-    cout << "Enter Player Number: " << endl;
-    cin >> count;
-    if (count <= 0)
-    {
-        cerr << "Invalid player count.\n";
-        return 1;
-    }
-    int turn = 0;
-    
-    int turnCount = 0;
-    vector<Player> player(count);
-    dice d1;
-    board b1;
-    setupPlayers(player);
-    player[turn].greet();
+
+    map<int, room> Ac_rooms;
+    // mt19937 gen{random_device{}()};
+    mt19937 gen{static_cast<unsigned>(std::time(nullptr))};
+    uniform_int_distribution<int> range{1000, 9999};
     while (true)
     {
-        turnCount++;
-       cout << "\n----------------------------------------";
-        cout << "\nTurn of " << player[turn].name << " (Player " << turn + 1 << "):";
-        player[turn].getMove(d1);
-        player[turn].setMove(b1);
-        player[turn].currentState();
-        if (player[turn].isFinished())
+        cout << "\n--- SNAKES & LADDERS ---\n";
+        cout << "1. Create Room\n2. Join Room\n3. Exit\nChoose: ";
+        int choice;
+        clear_buffer();
+        cin >> choice;
+        if (choice == 1)
         {
+
+            int code = range(gen);
+            room newRoom;
+            cout << "Enter Target Player Number: " << endl;
+            cin >> newRoom.capacity;
+            if (newRoom.capacity <= 0)
+            {
+                cerr << "Invalid player count.\n";
+                exit(1);
+            }
+            newRoom.id = code;
+            Player host;
+            cout << "Enter Host Name: ";
+            cin >> host.name;
+            newRoom.player.push_back(host);
+            cout << "\nRoom created! Your Room Code is: " << code << "\n";
+            Ac_rooms[code] = newRoom;
+        }
+        else if (choice == 2)
+        {
+            int code;
+            cout << "Enter 4-Digit Room Code: ";
+            clear_buffer();
+            cin >> code;
+
+            auto it = Ac_rooms.find(code);
+            if (it != Ac_rooms.end())
+            {
+                room &r = it->second;
+                if (r.player.size() >=(r.capacity))
+                {
+                    cout << "Room is already full!\n";
+                    continue;
+                }
+
+                Player guest;
+                cout << "Enter Player Name: ";
+                clear_buffer();
+                cin >> guest.name;
+                r.player.push_back(guest);
+
+                cout << "Joined room " << code << "! (" << r.player.size() << "/" << r.capacity << ")\n";
+
+                if (r.player.size() == (r.capacity))
+                {
+                    cout << "Room full! Starting game...\n";
+                    r.start_game();
+                    Ac_rooms.erase(it);
+                }
+            }
+            else
+            {
+                cout << "Room code not found!\n";
+            }
+        }
+        else if (choice == 3)
+        {
+            cout << "Exiting program...\n";
             break;
         }
-        turn++;
-        if (turn == (count))
+        else
         {
-            turn = 0;
+            cout << "Invalid choice! Try again.\n";
         }
     }
-
-    cout << "\nGame won in " << turnCount << " turns!\n";
-    cout << "\nGame won by player: " << player[turn].name << "\n";
     return 0;
 }
-
-
-
- 
