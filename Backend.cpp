@@ -2,9 +2,8 @@
 #include <random>
 #include <ctime>
 #include <map>
-#include<vector>
+#include <vector>
 using namespace std;
-
 
 void clear_buffer();
 class dice;
@@ -75,15 +74,16 @@ void Player ::greet()
 
 void Player::getMove(dice &d1)
 {
-    cout << "\nPress any key roll the dice" << endl;
-    clear_buffer();
-    cin >> temp;
+     cout << "\n -> Press ENTER (or type 'Q' to quit): ";
+    cin.get(temp);
+
     if (temp == 'q' || temp == 'Q')
     {
+        cout << "\nQuitting game...\n";
         exit(0);
     }
-    else
-        roll = d1.randomRoll();
+    
+    roll = d1.randomRoll();
 }
 
 void Player::setMove(board &b1)
@@ -148,8 +148,11 @@ public:
     bool started = false;
     int start_game()
     {
-        system("cls");
-        cout << "\n\tSNAKE AND LADDERS\n";
+    system("cls");
+    cout << "=================================================================\n";
+    cout << "                     SNAKES AND LADDERS GAME                     \n";
+    cout << "=================================================================\n";
+
         int turn = 0;
         int turnCount = 0;
         dice d1;
@@ -179,10 +182,12 @@ public:
         return 0;
     }
 };
-void clear_buffer() {
+void clear_buffer()
+{
     cin.clear();
     int ch;
-    while ((ch = cin.get()) != '\n' && ch != EOF);
+    while ((ch = cin.get()) != '\n' && ch != EOF)
+        ;
 }
 int main()
 {
@@ -196,8 +201,9 @@ int main()
         cout << "\n--- SNAKES & LADDERS ---\n";
         cout << "1. Create Room\n2. Join Room\n3. Exit\nChoose: ";
         int choice;
-        clear_buffer();
+
         cin >> choice;
+        clear_buffer();
         if (choice == 1)
         {
 
@@ -214,22 +220,25 @@ int main()
             Player host;
             cout << "Enter Host Name: ";
             cin >> host.name;
+            clear_buffer();
             newRoom.player.push_back(host);
             cout << "\nRoom created! Your Room Code is: " << code << "\n";
+            system("cls");
+             cout << "\n [*] ROOM CODE: " << code << " (Share this with other players)";
             Ac_rooms[code] = newRoom;
         }
         else if (choice == 2)
         {
             int code;
             cout << "Enter 4-Digit Room Code: ";
-            clear_buffer();
-            cin >> code;
 
+            cin >> code;
+            clear_buffer();
             auto it = Ac_rooms.find(code);
             if (it != Ac_rooms.end())
             {
                 room &r = it->second;
-                if (r.player.size() >=(r.capacity))
+                if (r.player.size() >= (r.capacity))
                 {
                     cout << "Room is already full!\n";
                     continue;
@@ -237,8 +246,9 @@ int main()
 
                 Player guest;
                 cout << "Enter Player Name: ";
-                clear_buffer();
+
                 cin >> guest.name;
+                clear_buffer();
                 r.player.push_back(guest);
 
                 cout << "Joined room " << code << "! (" << r.player.size() << "/" << r.capacity << ")\n";
